@@ -457,6 +457,7 @@ name = "git-rg"
 version = "0.1.0"
 dependencies = [
  "codspeed-divan-compat",
+ "dashmap",
  "gix",
  "grep",
  "rayon",

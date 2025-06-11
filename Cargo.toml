@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+dashmap = "6.1.0"
 gix = "0.72.1"
 grep = { version = "0.3.2", features = ["avx-accel", "simd-accel"] }
 rayon = "1.10.0"
@@ -23,5 +24,5 @@ divan = { version = "2.10.1", package = "codspeed-divan-compat" }
 
 
 [[bench]]
-name = "search_at_rev"
+name = "with_repo"
 harness = false
