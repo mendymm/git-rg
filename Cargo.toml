@@ -1,0 +1,27 @@
+[package]
+name = "git-rg"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+gix = "0.72.1"
+grep = { version = "0.3.2", features = ["avx-accel", "simd-accel"] }
+rayon = "1.10.0"
+termcolor = "1.4.1"
+
+# [target.'cfg(not(target_env = "msvc"))'.dependencies]
+# tikv-jemallocator = "0.6"
+
+[dev-dependencies]
+divan = { version = "2.10.1", package = "codspeed-divan-compat" }
+
+# [profile.release]
+# codegen-units = 1
+# lto = false
+# panic = "abort"
+# strip = "debuginfo"
+
+
+[[bench]]
+name = "search_at_rev"
+harness = false
