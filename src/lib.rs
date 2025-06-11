@@ -17,11 +17,11 @@ use grep::{
 };
 use std::collections::VecDeque;
 use std::io::IsTerminal as _;
-use std::sync::atomic::AtomicUsize;
 use std::sync::Arc;
+use std::sync::atomic::AtomicUsize;
 use termcolor::ColorChoice;
 
-pub static COUNTER:AtomicUsize=AtomicUsize::new(0);
+pub static COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 pub fn search_repo(thread_safe_repo: Arc<ThreadSafeRepository>, regex: &str) {
     let searched_objects = Arc::new(DashSet::<ObjectId>::new());
@@ -117,6 +117,7 @@ impl<'repo> GitSearcher<'repo> {
         }
     }
 
+    #[inline(always)]
     fn pop_element(&mut self) {
         if let Some(pos) = self.path.rfind_byte(b'/') {
             self.path.resize(pos, 0);
@@ -125,6 +126,7 @@ impl<'repo> GitSearcher<'repo> {
         }
     }
 
+    #[inline(always)]
     fn push_element(&mut self, name: &BStr) {
         if name.is_empty() {
             return;
@@ -137,10 +139,12 @@ impl<'repo> GitSearcher<'repo> {
 }
 
 impl<'repo> gix::traverse::tree::Visit for GitSearcher<'repo> {
+    #[inline(always)]
     fn pop_back_tracked_path_and_set_current(&mut self) {
         self.path = self.path_deque.pop_back().unwrap_or_default();
     }
 
+    #[inline(always)]
     fn pop_front_tracked_path_and_set_current(&mut self) {
         self.path = self
             .path_deque
@@ -148,24 +152,29 @@ impl<'repo> gix::traverse::tree::Visit for GitSearcher<'repo> {
             .expect("every call is matched with push_tracked_path_component");
     }
 
+    #[inline(always)]
     fn push_back_tracked_path_component(&mut self, component: &BStr) {
         self.push_element(component);
         self.path_deque.push_back(self.path.clone());
     }
 
+    #[inline(always)]
     fn push_path_component(&mut self, component: &BStr) {
         self.push_element(component);
     }
 
+    #[inline(always)]
     fn pop_path_component(&mut self) {
         self.pop_element();
     }
 
+    #[inline(always)]
     fn visit_tree(&mut self, _entry: &tree::EntryRef<'_>) -> Action {
         // self.records.push(Entry::new(entry, self.path_clone()));
         Action::Continue
     }
 
+    #[inline(always)]
     fn visit_nontree(&mut self, entry: &tree::EntryRef<'_>) -> Action {
         if self.searched_objects.contains(entry.oid) {
             return Action::Skip;
@@ -185,7 +194,5 @@ impl<'repo> gix::traverse::tree::Visit for GitSearcher<'repo> {
         self.searched_objects.insert(entry.oid.into());
         COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         Action::Continue
-
-
     }
 }
