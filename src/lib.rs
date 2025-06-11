@@ -17,17 +17,13 @@ use grep::{
 };
 use std::collections::VecDeque;
 use std::io::IsTerminal as _;
+use std::sync::atomic::AtomicUsize;
 use std::sync::Arc;
 use termcolor::ColorChoice;
 
-// #[cfg(not(target_env = "msvc"))]
-// use tikv_jemallocator::Jemalloc;
+pub static COUNTER:AtomicUsize=AtomicUsize::new(0);
 
-// #[cfg(not(target_env = "msvc"))]
-// #[global_allocator]
-// static GLOBAL: Jemalloc = Jemalloc;
-
-pub fn search_repo(thread_safe_repo: ThreadSafeRepository, regex: &str) {
+pub fn search_repo(thread_safe_repo: Arc<ThreadSafeRepository>, regex: &str) {
     let searched_objects = Arc::new(DashSet::<ObjectId>::new());
     let pool = rayon::ThreadPoolBuilder::default().build().unwrap();
     pool.scope(|s| {
@@ -60,7 +56,7 @@ pub fn search_repo(thread_safe_repo: ThreadSafeRepository, regex: &str) {
 }
 
 pub fn search_commit(
-    thread_safe_repo: ThreadSafeRepository,
+    thread_safe_repo: Arc<ThreadSafeRepository>,
     commit_id: ObjectId,
     regex: &str,
     searched_objects: Arc<DashSet<ObjectId>>,
@@ -70,7 +66,7 @@ pub fn search_commit(
     // println!(
     //     "[{}] {}",
     //     &commit.id.to_hex_with_len(7),
-    //     commit.time().unwrap().format(format::GITOXIDE)
+    //     commit.time().unwrap().format(gix::date::time::format::GITOXIDE)
     // );
 
     let tree = commit.tree().unwrap();
@@ -187,6 +183,9 @@ impl<'repo> gix::traverse::tree::Visit for GitSearcher<'repo> {
             )
             .unwrap();
         self.searched_objects.insert(entry.oid.into());
+        COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         Action::Continue
+
+
     }
 }

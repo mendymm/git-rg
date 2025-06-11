@@ -18,7 +18,7 @@ fn bench_find_in_commit(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             (
-                ThreadSafeRepository::open("example-repo").unwrap(),
+                Arc::new(ThreadSafeRepository::open("example-repo").unwrap()),
                 ObjectId::from_hex(b"cbc598f245f3c157a872b69102653e2e349b6d92").unwrap(),
                 r#"This string does not exist"#,
                 Arc::new(DashSet::<ObjectId>::new()),
@@ -34,7 +34,7 @@ fn bench_find_in_repo(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             (
-                ThreadSafeRepository::open("example-repo").unwrap(),
+                Arc::new(ThreadSafeRepository::open("example-repo").unwrap()),
                 r#"This string does not exist"#,
             )
         })
